@@ -26,8 +26,8 @@ class Geocoding:
         params = {"address": address, "key": self.api_key}
         url = url_concat(self.base_url, params)
         client = AsyncHTTPClient()
-        result = yield client.get(url)
-        return result
+        response = yield client.fetch(url)
+        return response.body
 
     @coroutine
     def reverse_geocode(self, lat, lng):
@@ -37,9 +37,9 @@ class Geocoding:
         :param lng: longitude data
         :return: address data
         """
-        latlng = "%.6f,%.6f" % (lat, lng)
+        latlng = "%.6f,%.6f" % (float(lat), float(lng))
         params = {"latlng": latlng, "key": self.api_key}
         url = url_concat(self.base_url, params)
         client = AsyncHTTPClient()
-        result = yield client.get(url)
-        return result
+        response = yield client.fetch(url)
+        return response.body

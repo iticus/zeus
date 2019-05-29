@@ -26,5 +26,5 @@ class DarkSky:
         url = self.base_url + self.api_key + "/"
         url = url + "%s,%s?extend=hourly" % (lat, lng)
         client = AsyncHTTPClient()
-        data = yield client.get(url)
-        return data
+        response = yield client.fetch(url)
+        return response.body

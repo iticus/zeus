@@ -51,6 +51,7 @@ def make_app(io_loop=None):
         [
             (r"/", handlers.HomeHandler),
             (r"/forecast/?", handlers.ForecastHandler),
+            (r"/geocode/?", handlers.GeocodingHandler),
             (r"/(manifest\.json)", tornado.web.StaticFileHandler, {"path": "static"}),
             (r"/(service\-worker\.js)", tornado.web.StaticFileHandler, {"path": "static"}),
         ],

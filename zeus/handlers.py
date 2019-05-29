@@ -40,7 +40,7 @@ class ForecastHandler(BaseHandler):
 
 
 class GeocodingHandler(BaseHandler):
-    """Request Handler for "/geocoding"""
+    """Request Handler for "/geocode"""
 
     @tornado.gen.coroutine
     def get(self):
