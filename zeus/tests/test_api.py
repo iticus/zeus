@@ -53,7 +53,7 @@ class APITestCase(AsyncHTTPTestCase):
     def test_reverse_geocoding(self):
         """Test that we can reverse geocode a pair of coordinates"""
         url = self.get_url("/geocode")
-        url = url_concat(url, {"lat": self.lat, "lng": self.lng})
+        url = url_concat(url, {"lat": "%.6f" % self.lat, "lng": "%.6f" % self.lng})
         response = yield self.http_client.fetch(url)
         self.assertEqual(response.code, 200)
         data = json.loads(response.body.decode())
@@ -71,7 +71,7 @@ class APITestCase(AsyncHTTPTestCase):
     def test_retrieve_forecast(self):
         """Test that we can retrieve a forecast object"""
         url = self.get_url("/forecast")
-        url = url_concat(url, {"lat": self.lat, "lng": self.lng})
+        url = url_concat(url, {"lat": "%.6f" % self.lat, "lng": "%.6f" % self.lng})
         response = yield self.http_client.fetch(url)
         self.assertEqual(response.code, 200)
         data = json.loads(response.body.decode())

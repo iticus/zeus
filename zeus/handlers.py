@@ -4,14 +4,14 @@ Created on May 29, 2019
 @author: ionut
 """
 
-import tornado.web
-import tornado.websocket
+from tornado.web import RequestHandler
+from tornado.gen import coroutine
 
 from darksky import DarkSky
 from geocoding import Geocoding
 
 
-class BaseHandler(tornado.web.RequestHandler):
+class BaseHandler(RequestHandler):
     """Base Handler to be inherited / implemented by subsequent handlers"""
 
     def initialize(self):
@@ -29,7 +29,7 @@ class HomeHandler(BaseHandler):
 class ForecastHandler(BaseHandler):
     """Request Handler for "/forecast"""
 
-    @tornado.gen.coroutine
+    @coroutine
     def get(self):
         """Return forecast data for location"""
         lat = self.get_query_argument("lat", "")
@@ -42,7 +42,7 @@ class ForecastHandler(BaseHandler):
 class GeocodingHandler(BaseHandler):
     """Request Handler for "/geocode"""
 
-    @tornado.gen.coroutine
+    @coroutine
     def get(self):
         """Return geocoding information (forward/reverse)"""
         geocoding = Geocoding(self.config.GOOGLE_API_KEY)
@@ -54,7 +54,7 @@ class GeocodingHandler(BaseHandler):
             lat = self.get_query_argument("lat", "")
             lng = self.get_query_argument("lng", "")
             if not lat or not lng:
-                self.set_status("400")
+                self.set_status(400)
                 return self.finish({"error": "provide either address or lat/lng"})
             addr = yield geocoding.reverse_geocode(lat, lng)
             return self.finish(addr)
