@@ -4,27 +4,29 @@ Created on May 29, 2019
 @author: ionut
 """
 
-from tornado.gen import coroutine
-from tornado.httpclient import AsyncHTTPClient
+from aiohttp import ClientSession
+from urllib.parse import urljoin
 
 
 class DarkSky:
     """Dark Sky weather forecast async implementation"""
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, session=None):
         self.api_key = api_key
-        self.base_url = "https://api.darksky.net/forecast/"
+        self.base_url = "https://api.darksky.net"
+        self.session = session
 
-    @coroutine
-    def get_forecast(self, lat, lng):
+    async def get_forecast(self, lat, lng):
         """
         Retrieve weather forecast
         :param lat: latitude for location
         :param lng: longitude for location
         :return: forecast data
         """
-        url = self.base_url + self.api_key + "/"
-        url = url + "%s,%s?extend=hourly" % (lat, lng)
-        client = AsyncHTTPClient()
-        response = yield client.fetch(url)
-        return response.body
+        url = urljoin(self.base_url, "forecast/%s/" % self.api_key)
+        url = urljoin(url, "%s,%s?extend=hourly" % (lat, lng))
+        if not self.session:
+            self.session = ClientSession()
+        response = await self.session.get(url)
+        data = await response.json(content_type=None)  # fix for text/plain
+        return data

@@ -14,7 +14,7 @@ function showPosition(position) {
         .then(response => response.text())
         .then(body => {
             let element = document.querySelector("#result");
-            element.innerHTML = "<pre>" + JSON.stringify(JSON.parse(body), null, 4) + "</pre>";
+            element.innerHTML = "<pre>" + JSON.stringify(JSON.parse(body.toString()), null, 4) + "</pre>";
         })
 }
 

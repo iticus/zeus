@@ -4,42 +4,41 @@ Created on May 29, 2019
 @author: ionut
 """
 
-from tornado.gen import coroutine
-from tornado.httpclient import AsyncHTTPClient
-from tornado.httputil import url_concat
+from aiohttp import ClientSession
 
 
 class Geocoding:
     """Google Maps based forward & reverse geocoding implementation"""
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, client=None):
         self.api_key = api_key
         self.base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+        self.client = client
 
-    @coroutine
-    def forward_geocode(self, address):
+    async def forward_geocode(self, address):
         """
         Retrieve geographic coordinates for given address
         :param address: address to geocode
         :return: geocoding data
         """
         params = {"address": address, "key": self.api_key}
-        url = url_concat(self.base_url, params)
-        client = AsyncHTTPClient()
-        response = yield client.fetch(url)
-        return response.body
+        if not self.client:
+            self.client = ClientSession()
+        response = await self.client.get(self.base_url, params=params)
+        data = await response.json()
+        return data
 
-    @coroutine
-    def reverse_geocode(self, lat, lng):
+    async def reverse_geocode(self, lat, lng):
         """
-        Rertrieve address for given geographic coordinates
+        Retrieve address for given geographic coordinates
         :param lat: latitude data
         :param lng: longitude data
         :return: address data
         """
         latlng = "%.6f,%.6f" % (float(lat), float(lng))
         params = {"latlng": latlng, "key": self.api_key}
-        url = url_concat(self.base_url, params)
-        client = AsyncHTTPClient()
-        response = yield client.fetch(url)
-        return response.body
+        if not self.client:
+            self.client = ClientSession()
+        response = await self.client.get(self.base_url, params=params)
+        data = await response.json()
+        return data
