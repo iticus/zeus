@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8">
-        <title>Zeus Weather</title>
-        <meta name="description" content="Zeus Weather App">
-        <meta name="author" content="iticus">
-        <link rel="stylesheet" href="/static/css/main.css">
-        <script src="/static/js/main.js"></script>
+        {% block head %}
+            <meta charset="utf-8">
+            <title>Zeus Weather</title>
+            <meta name="description" content="Zeus Weather App">
+            <meta name="author" content="iticus">
+            <link rel="stylesheet" href="/static/css/main.css">
+            <script src="/static/js/main.js"></script>
+        {% endblock %}
     </head>
     <body>
         {% block body %}<h1>Zeus Weather App</h1>{% endblock %}

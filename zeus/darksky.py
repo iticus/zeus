@@ -24,7 +24,7 @@ class DarkSky:
         :return: forecast data
         """
         url = urljoin(self.base_url, "forecast/%s/" % self.api_key)
-        url = urljoin(url, "%s,%s?extend=hourly" % (lat, lng))
+        url = urljoin(url, "%s,%s?extend=hourly&units=si" % (lat, lng))
         if not self.session:
             self.session = ClientSession()
         response = await self.session.get(url)
