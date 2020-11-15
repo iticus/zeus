@@ -1,6 +1,6 @@
 *.log
 *.pyc
-settings.py
+zeus/settings.py
 __pycache__/
 .project
 .pydevproject
