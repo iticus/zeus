@@ -8,30 +8,46 @@ function getLocation() {
 
 function processForecast(forecast) {
     let x = [];
-    let temperature = {y: [], type: "scatter", "name": "Temperature"};
-    let wind = {y: [], type: "scatter", "name": "Wind", yaxis: "y2"};
-    for (let i = 0; i < forecast.hourly.data.length; i++) {
-        let item = forecast.hourly.data[i];
-        x.push(new Date(item.time * 1000));
-        temperature.y.push(item.temperature);
-        wind.y.push(item.windSpeed);
+    let temperatureLow = {
+        y: [], x: x, type: "bar", "name": "Low",
+        textposition: "auto", hoverinfo: "none", opacity: 0.9
     }
-    temperature.x = x;
-    wind.x = x;
-    let data = [temperature, wind];
-    let layout = {
-        xaxis: {"tickformat": "%d/%m"},
-        title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
-        yaxis: {title: "Temperature [C]"},
-        yaxis2: {
-            title: "Wind [km/h]",
-            titlefont: {color: "rgb(148, 103, 189)"},
-            tickfont: {color: "rgb(148, 103, 189)"},
-            overlaying: "y",
-            side: "right"
-        }
+    let temperatureHigh = {
+        y: [], x: x, type: "bar", "name": "High",
+        textposition: "auto", hoverinfo: "none", opacity: 0.9
     };
-    Plotly.newPlot("result", data, layout);
+    for (let i = 0; i < forecast.daily.data.length; i++) {
+        let item = forecast.daily.data[i];
+        x.push(new Date(item.time * 1000));
+        temperatureLow.y.push(item.temperatureLow);
+        temperatureHigh.y.push(item.temperatureHigh);
+    }
+    temperatureLow.text = temperatureLow.y.map(String);
+    temperatureHigh.text = temperatureHigh.y.map(String);
+    //
+    // let wind = {y: [], type: "scatter", "name": "Wind", yaxis: "y2"};
+    // wind.x = x;
+    // let data = [temperature, wind];
+    // let layout = {
+    //     xaxis: {"tickformat": "%d/%m"},
+    //     title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
+    //     yaxis: {title: "Temperature [C]"},
+    //     yaxis2: {
+    //         title: "Wind [km/h]",
+    //         titlefont: {color: "rgb(148, 103, 189)"},
+    //         tickfont: {color: "rgb(148, 103, 189)"},
+    //         overlaying: "y",
+    //         side: "right"
+    //     }
+    // };
+    let data = [temperatureLow, temperatureHigh];
+    let layout = {
+        title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
+        barmode: "relative",
+        xaxis: {"tickformat": "%d %B"},
+        yaxis: {title: "Temperature [C]"}
+    };
+    Plotly.newPlot("temperatureChart", data, layout);
 }
 
 function showPosition(position) {
