@@ -24,22 +24,6 @@ function processForecast(forecast) {
     }
     temperatureLow.text = temperatureLow.y.map(String);
     temperatureHigh.text = temperatureHigh.y.map(String);
-    //
-    // let wind = {y: [], type: "scatter", "name": "Wind", yaxis: "y2"};
-    // wind.x = x;
-    // let data = [temperature, wind];
-    // let layout = {
-    //     xaxis: {"tickformat": "%d/%m"},
-    //     title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
-    //     yaxis: {title: "Temperature [C]"},
-    //     yaxis2: {
-    //         title: "Wind [km/h]",
-    //         titlefont: {color: "rgb(148, 103, 189)"},
-    //         tickfont: {color: "rgb(148, 103, 189)"},
-    //         overlaying: "y",
-    //         side: "right"
-    //     }
-    // };
     let data = [temperatureLow, temperatureHigh];
     let layout = {
         title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
@@ -48,6 +32,26 @@ function processForecast(forecast) {
         yaxis: {title: "Temperature [C]"}
     };
     Plotly.newPlot("temperatureChart", data, layout);
+
+    document.getElementById("temperatureChart").on("plotly_click", function(data) {
+        let key = data.points[0].x;
+        let hourlyTemperature = {y: [], x: [], type: "scatter", "name": "Temperature"}
+        for (let i = 0; i < forecast.hourly.data.length; i++) {
+            let item = forecast.hourly.data[i];
+            let d = new Date(item.time * 1000);
+            let k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            if (key == k) {
+                hourlyTemperature.x.push(d);
+                hourlyTemperature.y.push(item.temperature);
+            }
+        }
+        let layout = {
+            title: key,
+            xaxis: {"tickformat": "%H:%M"},
+            yaxis: {title: "Temperature [C]"}
+        };
+        Plotly.newPlot("hourlyChart", [hourlyTemperature], layout);
+    });
 }
 
 function showPosition(position) {
