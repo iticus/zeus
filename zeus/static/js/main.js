@@ -24,33 +24,45 @@ function processForecast(forecast) {
     }
     temperatureLow.text = temperatureLow.y.map(String);
     temperatureHigh.text = temperatureHigh.y.map(String);
-    let data = [temperatureLow, temperatureHigh];
+    let dailyData = [temperatureLow, temperatureHigh];
     let layout = {
         title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
         barmode: "relative",
         xaxis: {"tickformat": "%d %B"},
         yaxis: {title: "Temperature [C]"}
     };
-    Plotly.newPlot("temperatureChart", data, layout);
+    Plotly.newPlot("temperatureChart", dailyData, layout);
 
     document.getElementById("temperatureChart").on("plotly_click", function(data) {
         let key = data.points[0].x;
         let hourlyTemperature = {y: [], x: [], type: "scatter", "name": "Temperature"}
+        let hourlyPrecipitation = {y: [], x: [], type: "scatter", "name": "Precipitation", yaxis: "y2"}
         for (let i = 0; i < forecast.hourly.data.length; i++) {
             let item = forecast.hourly.data[i];
             let d = new Date(item.time * 1000);
             let k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-            if (key == k) {
+            if (key === k) {
                 hourlyTemperature.x.push(d);
                 hourlyTemperature.y.push(item.temperature);
+                hourlyPrecipitation.x.push(d);
+                hourlyPrecipitation.y.push(item.precipProbability);
             }
         }
+        let hourlyData = [hourlyTemperature, hourlyPrecipitation];
         let layout = {
             title: key,
             xaxis: {"tickformat": "%H:%M"},
-            yaxis: {title: "Temperature [C]"}
+            yaxis: {title: "Temperature [C]"},
+            yaxis2: {
+                title: "Precipitation [%]",
+                titlefont: {color: "rgb(148, 103, 189)"},
+                tickfont: {color: "rgb(148, 103, 189)"},
+                tickformat: ',.0%',
+                overlaying: "y",
+                side: "right"
+            }
         };
-        Plotly.newPlot("hourlyChart", [hourlyTemperature], layout);
+        Plotly.newPlot("hourlyChart", hourlyData, layout);
     });
 }
 
