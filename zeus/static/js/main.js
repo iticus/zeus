@@ -27,6 +27,7 @@ function processForecast(forecast) {
     let dailyData = [temperatureLow, temperatureHigh];
     let layout = {
         title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
+        colorway : ['#277DA1', '#F9C74F'],
         barmode: "relative",
         xaxis: {"tickformat": "%d %B"},
         yaxis: {title: "Temperature [C]"}
@@ -35,8 +36,8 @@ function processForecast(forecast) {
 
     document.getElementById("temperatureChart").on("plotly_click", function(data) {
         let key = data.points[0].x;
-        let hourlyTemperature = {y: [], x: [], type: "scatter", "name": "Temperature"}
-        let hourlyPrecipitation = {y: [], x: [], type: "scatter", "name": "Precipitation", yaxis: "y2"}
+        let hourlyTemperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
+        let hourlyPrecipitation = {y: [], x: [], type: "line", "name": "Precipitation", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
         for (let i = 0; i < forecast.hourly.data.length; i++) {
             let item = forecast.hourly.data[i];
             let d = new Date(item.time * 1000);
@@ -51,6 +52,7 @@ function processForecast(forecast) {
         let hourlyData = [hourlyTemperature, hourlyPrecipitation];
         let layout = {
             title: key,
+            colorway : ['#F9C74F', '#90BE6D'],
             xaxis: {"tickformat": "%H:%M"},
             yaxis: {title: "Temperature [C]"},
             yaxis2: {
