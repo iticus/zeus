@@ -1,6 +1,6 @@
 function getLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
+        navigator.geolocation.getCurrentPosition(processLocation);
     } else {
         alert("Geolocation is not supported by this browser.");
     }
@@ -26,7 +26,7 @@ function processForecast(forecast) {
     temperatureHigh.text = temperatureHigh.y.map(String);
     let dailyData = [temperatureLow, temperatureHigh];
     let layout = {
-        title: "Weather Forecast for " + forecast.latitude + ", " + forecast.longitude,
+        title: "Temperature",
         colorway : ['#277DA1', '#F9C74F'],
         barmode: "relative",
         xaxis: {"tickformat": "%d %B"},
@@ -68,15 +68,30 @@ function processForecast(forecast) {
     });
 }
 
-function showPosition(position) {
+function processLocation(position) {
     let latitude = position.coords.latitude;
     let longitude = position.coords.longitude;
-    let url = "/forecast?lat=" + latitude + "&lng=" + longitude;
-    fetch(url)
+    let geocodeUrl = "/geocode?lat=" + latitude + "&lng=" + longitude;
+    fetch(geocodeUrl)
         .then(response => response.text())
         .then(body => {
-            let element = document.querySelector("#result");
-            processForecast(JSON.parse(body));
+            let element = document.querySelector("#locationHeader");
+            let geocodeResult = JSON.parse(body);
+            let bestGuess = geocodeResult["results"][0];
+            for (let i=0; i<geocodeResult["results"].length;i++){
+                if (geocodeResult["results"][i]["geometry"]["location_type"] == "APPROXIMATE") {
+                    bestGuess = geocodeResult["results"][i];
+                    break;
+                }
+            }
+            element.innerHTML = bestGuess["formatted_address"];
+            let forecastUrl = "/forecast?lat=" + latitude + "&lng=" + longitude;
+            fetch(forecastUrl)
+                .then(response => response.text())
+                    .then(body => {
+                        let url = "/forecast?lat=" + latitude + "&lng=" + longitude;
+                        processForecast(JSON.parse(body));
+                    })
         })
 }
 
