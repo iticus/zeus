@@ -41,7 +41,7 @@ function processForecast(forecast) {
         for (let i = 0; i < forecast.hourly.data.length; i++) {
             let item = forecast.hourly.data[i];
             let d = new Date(item.time * 1000);
-            let k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            let k = d.toISOString().slice(0,10);
             if (key === k) {
                 hourlyTemperature.x.push(d);
                 hourlyTemperature.y.push(item.temperature);
