@@ -16,21 +16,27 @@ function processForecast(forecast) {
         y: [], x: x, type: "bar", "name": "High",
         textposition: "auto", hoverinfo: "none", opacity: 0.9
     };
+    let y_range = [100, -100];
     for (let i = 0; i < forecast.daily.data.length; i++) {
         let item = forecast.daily.data[i];
         x.push(new Date(item.time * 1000));
+        if (y_range[0] > item.temperatureLow)
+            y_range[0] = item.temperatureLow
+        if (y_range[1] < item.temperatureHigh)
+            y_range[1] = item.temperatureHigh
         temperatureLow.y.push(item.temperatureLow);
         temperatureHigh.y.push(item.temperatureHigh);
     }
+    y_range[0] -= 2; y_range[1] += 2;
     temperatureLow.text = temperatureLow.y.map(String);
     temperatureHigh.text = temperatureHigh.y.map(String);
-    let dailyData = [temperatureLow, temperatureHigh];
+    let dailyData = [temperatureHigh, temperatureLow];
     let layout = {
         title: "Temperature",
-        colorway : ['#277DA1', '#F9C74F'],
-        barmode: "relative",
-        xaxis: {"tickformat": "%d %B"},
-        yaxis: {title: "Temperature [C]"}
+        colorway : ['#F9C74F', '#277DA1'],
+        barmode: "group",
+        xaxis: {tickformat: "%d %B"},
+        yaxis: {title: "Temperature [C]", autorange: true, range: y_range}
     };
     Plotly.newPlot("temperatureChart", dailyData, layout);
 
