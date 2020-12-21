@@ -5,3 +5,7 @@ body {
 .js-plotly-plot .plotly .cursor-crosshair {
     cursor: default !important;
 }
+
+.nav-tabs > li > a {
+  font-size: 24px;
+}
