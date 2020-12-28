@@ -104,6 +104,6 @@ function processLocation(position) {
 document.addEventListener("DOMContentLoaded", () => {
     getLocation();
     $(".nav-tabs").find("a").on("show.bs.tab", function () {
-        //alert(this);  //TODO: switch forecast data on click
+        $('#locationModal').modal('show');
     });
 });
