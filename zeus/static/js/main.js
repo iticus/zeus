@@ -1,9 +1,53 @@
+function cacheForecast(location, forecast) {
+    localStorage.setItem(location, JSON.stringify(forecast));
+}
+
+function loadForecast(location) {
+    let data = localStorage.getItem(location);
+    if (data === null) {
+        return {};
+    }
+    return JSON.parse(data);
+}
+
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(processLocation);
     } else {
         alert("Geolocation is not supported by this browser.");
     }
+}
+
+function generateTemperaturePrecipitation(forecast, key) {
+    let hourlyTemperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
+    let hourlyPrecipitation = {y: [], x: [], type: "line", "name": "Precipitation", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
+    for (let i = 0; i < forecast.hourly.data.length; i++) {
+        let item = forecast.hourly.data[i];
+        let d = new Date(item.time * 1000);
+        let k = d.toISOString().slice(0,10);
+        if (key === undefined || key === k) {
+            hourlyTemperature.x.push(d);
+            hourlyTemperature.y.push(item.temperature);
+            hourlyPrecipitation.x.push(d);
+            hourlyPrecipitation.y.push(item.precipProbability);
+        }
+    }
+    let hourlyData = [hourlyTemperature, hourlyPrecipitation];
+    let layout = {
+        title: key,
+        colorway : ['#F9C74F', '#90BE6D'],
+        xaxis: {"tickformat": "%H:%M"},
+        yaxis: {title: "Temperature [C]"},
+        yaxis2: {
+            title: "Precipitation [%]",
+            titlefont: {color: "rgb(148, 103, 189)"},
+            tickfont: {color: "rgb(148, 103, 189)"},
+            tickformat: ',.0%',
+            overlaying: "y",
+            side: "right"
+        }
+    };
+    Plotly.newPlot("hourlyChart", hourlyData, layout);
 }
 
 function processForecast(forecast) {
@@ -39,38 +83,10 @@ function processForecast(forecast) {
         yaxis: {title: "Temperature [C]", autorange: true, range: y_range}
     };
     Plotly.newPlot("temperatureChart", dailyData, layout);
-
+    generateTemperaturePrecipitation(forecast);
     document.getElementById("temperatureChart").on("plotly_click", function(data) {
         let key = data.points[0].x;
-        let hourlyTemperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
-        let hourlyPrecipitation = {y: [], x: [], type: "line", "name": "Precipitation", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
-        for (let i = 0; i < forecast.hourly.data.length; i++) {
-            let item = forecast.hourly.data[i];
-            let d = new Date(item.time * 1000);
-            let k = d.toISOString().slice(0,10);
-            if (key === k) {
-                hourlyTemperature.x.push(d);
-                hourlyTemperature.y.push(item.temperature);
-                hourlyPrecipitation.x.push(d);
-                hourlyPrecipitation.y.push(item.precipProbability);
-            }
-        }
-        let hourlyData = [hourlyTemperature, hourlyPrecipitation];
-        let layout = {
-            title: key,
-            colorway : ['#F9C74F', '#90BE6D'],
-            xaxis: {"tickformat": "%H:%M"},
-            yaxis: {title: "Temperature [C]"},
-            yaxis2: {
-                title: "Precipitation [%]",
-                titlefont: {color: "rgb(148, 103, 189)"},
-                tickfont: {color: "rgb(148, 103, 189)"},
-                tickformat: ',.0%',
-                overlaying: "y",
-                side: "right"
-            }
-        };
-        Plotly.newPlot("hourlyChart", hourlyData, layout);
+        generateTemperaturePrecipitation(forecast, key);
     });
 }
 
