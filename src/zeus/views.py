@@ -8,8 +8,8 @@ import aiohttp_jinja2
 from aiohttp import web
 
 
-from darksky import DarkSky
-from geocoding import Geocoding
+from zeus.darksky import DarkSky
+from zeus.geocoding import Geocoding
 
 
 class BaseView(web.View):
