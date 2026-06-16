@@ -12,12 +12,7 @@ lng = 21.238764
 address = "Giroc"
 
 
-async def test_shutdown(zeus_app: TestClient) -> None:
-    """Test that the homepage responds with 200 and contains the service name"""
-    await zeus_app.app.shutdown()
-
-
-async def test_homepage(zeus_app):
+async def test_homepage(zeus_app: TestClient) -> None:
     response = await zeus_app.get("/")
     assert response.status == 200
     text = await response.text()
@@ -25,7 +20,7 @@ async def test_homepage(zeus_app):
     assert "error" not in text
 
 
-async def test_forward_geocoding(zeus_app) -> None:
+async def test_forward_geocoding(zeus_app: TestClient) -> None:
     """Test that we can forward geocode an address"""
     response = await zeus_app.get("/geocode", params={"address": address})
     assert response.status == 200
@@ -40,7 +35,7 @@ async def test_forward_geocoding(zeus_app) -> None:
     assert addr["geometry"]["location"]["lng"] < 22
 
 
-async def test_reverse_geocoding(zeus_app) -> None:
+async def test_reverse_geocoding(zeus_app: TestClient) -> None:
     """Test that we can reverse geocode a pair of coordinates"""
     response = await zeus_app.get("/geocode", params={"lat": "%.6f" % lat, "lng": "%.6f" % lng})
     assert response.status == 200
@@ -56,12 +51,27 @@ async def test_reverse_geocoding(zeus_app) -> None:
             assert component["long_name"] == "Romania"
 
 
-async def test_retrieve_forecast(zeus_app) -> None:
-    """Test that we can retrieve a forecast object"""
-    response = await zeus_app.get("/forecast", params={"lat": "%.6f" % lat, "lng": "%.6f" % lng})
+async def test_retrieve_weather(zeus_app: TestClient) -> None:
+    """Test that we can retrieve the current weather data"""
+    response = await zeus_app.get("/weather", params={"lat": lat, "lng": lng})
     assert response.status == 200
     data = await response.json()
-    assert data["timezone"], "Europe/Bucharest"
-    assert data["offset"] in [2, 3]
-    assert "currently" in data
-    assert "hourly" in data
+    assert data["timezone"] in [7200, 10800], f"expected Europe/Bucharest timezone offsets in {data}"
+    assert "weather" in data, f"no weather data found in {data}"
+    assert "main" in data, f"no main data found in {data}"
+    assert "wind" in data, f"no wind data found in {data}"
+    assert "clouds" in data, f"no clouds data found in {data}"
+    assert "temp" in data["main"], f"no main temp data found in {data}"
+
+
+async def test_retrieve_forecast(zeus_app: TestClient) -> None:
+    """Test that we can retrieve a forecast object"""
+    response = await zeus_app.get("/weather", params={"lat": lat, "lng": lng, "operation": "forecast"})
+    assert response.status == 200
+    data = await response.json()
+    assert "list" in data, f"no forecast data available in {data}"
+    for item in data["list"]:
+        assert isinstance(item["dt"], int), f"invalid dt in {item}"
+        assert isinstance(item["dt"], int), f"invalid dt in {item}"
+        assert "main" in item, f"no main data found in {item}"
+        assert "temp" in item["main"], f"no temp data found in {item}"

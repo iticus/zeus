@@ -1,8 +1,11 @@
 *.log
 *.pyc
-zeus/settings.py
 __pycache__/
 .project
 .pydevproject
 .idea/
+.vscode/
 .venv/
+
+.env
+

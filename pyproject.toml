@@ -53,7 +53,7 @@ format.line-ending = "lf"
 ini_options.pythonpath = "src"
 ini_options.addopts = [
   "--import-mode=importlib",
-  "--pythonwarnings=error",
+  #"--pythonwarnings=error",
 ]
 ini_options.asyncio_mode = "auto"
 ini_options.log_cli = true

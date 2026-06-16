@@ -28,5 +28,5 @@ TEMPLATE_PATH = FOLDER / "templates"
 STATIC_PATH = FOLDER / "static"
 
 # API keys
-DARKSKY_API_KEY = os.getenv("DARKSKY_API_KEY")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")

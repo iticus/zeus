@@ -10,25 +10,25 @@ from aiohttp import ClientSession
 class Geocoding:
     """Google Maps based forward & reverse geocoding implementation"""
 
-    def __init__(self, api_key, client=None):
+    def __init__(self, api_key: str, session: ClientSession | None = None):
         self.api_key = api_key
         self.base_url = "https://maps.googleapis.com/maps/api/geocode/json"
-        self.client = client
+        self.session = session
 
-    async def forward_geocode(self, address):
+    async def forward_geocode(self, address: str) -> dict:
         """
         Retrieve geographic coordinates for given address
         :param address: address to geocode
         :return: geocoding data
         """
         params = {"address": address, "key": self.api_key}
-        if not self.client:
-            self.client = ClientSession()
-        response = await self.client.get(self.base_url, params=params)
+        if not self.session:
+            self.session = ClientSession()
+        response = await self.session.get(self.base_url, params=params)
         data = await response.json()
         return data
 
-    async def reverse_geocode(self, lat, lng):
+    async def reverse_geocode(self, lat: float, lng: float) -> dict:
         """
         Retrieve address for given geographic coordinates
         :param lat: latitude data
@@ -37,8 +37,8 @@ class Geocoding:
         """
         latlng = "%.6f,%.6f" % (float(lat), float(lng))
         params = {"latlng": latlng, "key": self.api_key}
-        if not self.client:
-            self.client = ClientSession()
-        response = await self.client.get(self.base_url, params=params)
+        if not self.session:
+            self.session = ClientSession()
+        response = await self.session.get(self.base_url, params=params)
         data = await response.json()
         return data

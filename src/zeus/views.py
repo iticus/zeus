@@ -1,14 +1,15 @@
 """
 Created on May 29, 2019
 
-@author: ionut
+@author: iticus
 """
 
 import aiohttp_jinja2
 from aiohttp import web
 
 
-from zeus.darksky import DarkSky
+from zeus import appkeys
+from zeus.weather import OpenWeather
 from zeus.geocoding import Geocoding
 
 
@@ -17,9 +18,9 @@ class BaseView(web.View):
 
     def __init__(self, request):
         super().__init__(request)
-        self.cache = request.app.cache  # TODO: simple in-memory cache
-        self.config = request.app.config
-        self.client = request.app.client
+        self.cache = request.app[appkeys.cache]  # TODO: simple in-memory cache
+        self.config = request.app[appkeys.config]
+        self.client = request.app[appkeys.client]
 
 
 class Home(BaseView):
@@ -29,16 +30,25 @@ class Home(BaseView):
         return aiohttp_jinja2.render_template("home.html", self.request, context={})
 
 
-class Forecast(BaseView):
-    """View for "/forecast"""
+class Weather(BaseView):
+    """View for forecast and current weather data"""
 
     async def get(self):
         """Return forecast data for location"""
+        operation = self.request.query.get("operation", "weather")
         lat = self.request.query.get("lat", "")
         lng = self.request.query.get("lng", "")
-        dark_sky = DarkSky(self.config.DARKSKY_API_KEY, self.client)
-        forecast = await dark_sky.get_forecast(lat, lng)
-        return web.json_response(forecast)
+        try:
+            lat = float(lat)
+            lng = float(lng)
+        except ValueError:
+            return web.json_response(data={"status": "error", "data": "invalid coordinates"}, status=400)
+        open_weather = OpenWeather(self.config.WEATHER_API_KEY, session=self.client)
+        if operation == "weather":
+            data = await open_weather.get_weather(lat, lng)
+        else:
+            data = await open_weather.get_forecast(lat, lng)
+        return web.json_response(data)
 
 
 class Geocoder(BaseView):
@@ -54,6 +64,11 @@ class Geocoder(BaseView):
         else:
             lat = self.request.query.get("lat", "")
             lng = self.request.query.get("lng", "")
+            try:
+                lat = float(lat)
+                lng = float(lng)
+            except ValueError:
+                return web.json_response(data={"status": "error", "data": "invalid coordinates"}, status=400)
             if not lat or not lng:
                 return web.json_response({"error": "provide either address or lat/lng"}, status=400)
             addr = await geocoding.reverse_geocode(lat, lng)
