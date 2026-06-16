@@ -21,15 +21,15 @@ function getLocation() {
 function generateTemperaturePrecipitation(forecast, key) {
     let hourlyTemperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
     let hourlyPrecipitation = {y: [], x: [], type: "line", "name": "Precipitation", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
-    for (let i = 0; i < forecast.hourly.data.length; i++) {
-        let item = forecast.hourly.data[i];
-        let d = new Date(item.time * 1000);
+    for (let i = 0; i < forecast.list.length; i++) {
+        let item = forecast.list[i];
+        let d = new Date(item.dt * 1000);       
         let k = d.toISOString().slice(0,10);
         if (key === undefined || key === k) {
             hourlyTemperature.x.push(d);
-            hourlyTemperature.y.push(item.temperature);
+            hourlyTemperature.y.push(item.main.temp);
             hourlyPrecipitation.x.push(d);
-            hourlyPrecipitation.y.push(item.precipProbability);
+            hourlyPrecipitation.y.push(item.main.humidity);
         }
     }
     let hourlyData = [hourlyTemperature, hourlyPrecipitation];
@@ -61,15 +61,15 @@ function processForecast(forecast) {
         textposition: "auto", hoverinfo: "none", opacity: 0.9
     };
     let y_range = [100, -100];
-    for (let i = 0; i < forecast.daily.data.length; i++) {
-        let item = forecast.daily.data[i];
-        x.push(new Date(item.time * 1000));
-        if (y_range[0] > item.temperatureLow)
-            y_range[0] = item.temperatureLow
-        if (y_range[1] < item.temperatureHigh)
-            y_range[1] = item.temperatureHigh
-        temperatureLow.y.push(item.temperatureLow);
-        temperatureHigh.y.push(item.temperatureHigh);
+    for (let i = 0; i < forecast.list.length; i++) {
+        let item = forecast.list[i];
+        x.push(new Date(item.dt * 1000));
+        if (y_range[0] > item.main.temp_min)
+            y_range[0] = item.main.temp_min
+        if (y_range[1] < item.main.temp_max)
+            y_range[1] = item.main.temp_max
+        temperatureLow.y.push(item.main.temp_min);
+        temperatureHigh.y.push(item.main.temp_max);
     }
     y_range[0] -= 2; y_range[1] += 2;
     temperatureLow.text = temperatureLow.y.map(String);
@@ -107,11 +107,11 @@ function processLocation(position) {
                 }
             }
             element.innerHTML = bestGuess["formatted_address"];
-            let forecastUrl = "/forecast?lat=" + latitude + "&lng=" + longitude;
+            let forecastUrl = "/weather?operation=forecast&lat=" + latitude + "&lng=" + longitude;
             fetch(forecastUrl)
                 .then(response => response.text())
                     .then(body => {
-                        let url = "/forecast?lat=" + latitude + "&lng=" + longitude;
+                        // let url = "/forecast?lat=" + latitude + "&lng=" + longitude;
                         processForecast(JSON.parse(body));
                     })
         })

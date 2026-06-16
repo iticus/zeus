@@ -21,7 +21,7 @@ class OpenWeather:
         url = urljoin(self.base_url, f"{self.version}/{path}")
         if not self.session:
             self.session = ClientSession()
-        params = {"lat": lat, "lon": lng, "appid": self.api_key}
+        params = {"lat": lat, "lon": lng, "appid": self.api_key, "units": "metric"}
         response = await self.session.get(url, params=params)
         data = await response.json()
         return data

@@ -12,15 +12,15 @@ from aiohttp import web, ClientSession
 from zeus import appkeys, settings, views
 
 
-async def startup(app):
+async def startup(app: web.Application) -> None:
     app[appkeys.client] = ClientSession()
 
 
-async def shutdown(app):
+async def shutdown(app: web.Application) -> None:
     await app[appkeys.client].close()
 
 
-def make_app():
+def make_app() -> web.Application:
     """
     Create and return aiohttp.web.Application object
     :returns: application instance
@@ -40,20 +40,11 @@ def make_app():
     return app
 
 
-def main():
+def main() -> None:
     """Start aiohttp application instance"""
     app = make_app()
-    logging.info(
-        "starting zeus on %s:%s ...",
-        app[appkeys.config].ADDRESS,
-        app[appkeys.config].PORT,
-    )
-    web.run_app(
-        app,
-        host=app[appkeys.config].ADDRESS,
-        port=app[appkeys.config].PORT,
-        access_log=None,
-    )
+    logging.info("starting zeus on %s:%s ...", app[appkeys.config].ADDRESS, app[appkeys.config].PORT)
+    web.run_app(app, host=app[appkeys.config].ADDRESS, port=app[appkeys.config].PORT, access_log=None)
 
 
 if __name__ == "__main__":

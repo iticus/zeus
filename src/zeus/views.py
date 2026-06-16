@@ -18,7 +18,7 @@ class BaseView(web.View):
 
     def __init__(self, request):
         super().__init__(request)
-        self.cache = request.app[appkeys.cache]  # TODO: simple in-memory cache
+        self.cache = request.app[appkeys.cache]  # TODO: replace with redis
         self.config = request.app[appkeys.config]
         self.client = request.app[appkeys.client]
 
