@@ -18,28 +18,28 @@ function getLocation() {
     }
 }
 
-function generateTemperaturePrecipitation(forecast, key) {
-    let hourlyTemperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
-    let hourlyPrecipitation = {y: [], x: [], type: "line", "name": "Precipitation", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
+function generateTemperatureHumidity(forecast, key) {
+    let temperature = {y: [], x: [], type: "line", "name": "Temperature", "line": {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"}
+    let humidity = {y: [], x: [], type: "line", "name": "Humidity", yaxis: "y2",  "line": {"shape": "spline", "smoothing": 1.3},  fill: "tozeroy"}
     for (let i = 0; i < forecast.list.length; i++) {
         let item = forecast.list[i];
         let d = new Date(item.dt * 1000);       
         let k = d.toISOString().slice(0,10);
         if (key === undefined || key === k) {
-            hourlyTemperature.x.push(d);
-            hourlyTemperature.y.push(item.main.temp);
-            hourlyPrecipitation.x.push(d);
-            hourlyPrecipitation.y.push(item.main.humidity);
+            temperature.x.push(d);
+            temperature.y.push(item.main.temp);
+            humidity.x.push(d);
+            humidity.y.push(item.main.humidity);
         }
     }
-    let hourlyData = [hourlyTemperature, hourlyPrecipitation];
+    let data = [temperature, humidity];
     let layout = {
         title: key,
         colorway : ['#F9C74F', '#90BE6D'],
         xaxis: {"tickformat": "%H:%M"},
         yaxis: {title: "Temperature [C]"},
         yaxis2: {
-            title: "Precipitation [%]",
+            title: "Humidity [%]",
             titlefont: {color: "rgb(148, 103, 189)"},
             tickfont: {color: "rgb(148, 103, 189)"},
             tickformat: ',.0%',
@@ -47,27 +47,29 @@ function generateTemperaturePrecipitation(forecast, key) {
             side: "right"
         }
     };
-    Plotly.newPlot("hourlyChart", hourlyData, layout);
+    Plotly.newPlot("hourlyChart", data, layout);
 }
 
 function processForecast(forecast) {
     let x = [];
     let temperatureLow = {
-        y: [], x: x, type: "bar", "name": "Low",
-        textposition: "auto", hoverinfo: "none", opacity: 0.9
-    }
+        y: [], x: x, type: "line", "name": "Low", textposition: "auto", opacity: 0.9,
+        line: {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"
+    };
     let temperatureHigh = {
-        y: [], x: x, type: "bar", "name": "High",
-        textposition: "auto", hoverinfo: "none", opacity: 0.9
+        y: [], x: x, type: "line", "name": "High", textposition: "auto", opacity: 0.9,
+        line: {"shape": "spline", "smoothing": 1.3}, fill: "tozeroy"
     };
     let y_range = [100, -100];
     for (let i = 0; i < forecast.list.length; i++) {
         let item = forecast.list[i];
         x.push(new Date(item.dt * 1000));
-        if (y_range[0] > item.main.temp_min)
-            y_range[0] = item.main.temp_min
-        if (y_range[1] < item.main.temp_max)
-            y_range[1] = item.main.temp_max
+        if (y_range[0] > item.main.temp_min) {
+            y_range[0] = item.main.temp_min;
+        }
+        if (y_range[1] < item.main.temp_max) {
+            y_range[1] = item.main.temp_max;
+        }
         temperatureLow.y.push(item.main.temp_min);
         temperatureHigh.y.push(item.main.temp_max);
     }
@@ -78,15 +80,15 @@ function processForecast(forecast) {
     let layout = {
         title: "Temperature",
         colorway : ['#F9C74F', '#277DA1'],
-        barmode: "group",
+        // barmode: "group",
         xaxis: {tickformat: "%d %B"},
         yaxis: {title: "Temperature [C]", autorange: true, range: y_range}
     };
     Plotly.newPlot("temperatureChart", dailyData, layout);
-    generateTemperaturePrecipitation(forecast);
+    generateTemperatureHumidity(forecast);
     document.getElementById("temperatureChart").on("plotly_click", function(data) {
         let key = data.points[0].x;
-        generateTemperaturePrecipitation(forecast, key);
+        generateTemperatureHumidity(forecast, key);
     });
 }
 
