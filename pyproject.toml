@@ -49,6 +49,8 @@ format.indent-style = "space"
 format.quote-style = "double"
 format.line-ending = "lf"
 
+lint.select = [ "ALL" ]
+
 [tool.pytest]
 ini_options.pythonpath = "src"
 ini_options.addopts = [
